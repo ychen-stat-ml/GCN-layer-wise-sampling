@@ -17,6 +17,26 @@ To address these issues, we accordingly propose two remedies:
 1. a new principle for constructing sampling probabilities (implemented as `sketch_sampler()` in `./sketch/samplers.py`);
 2. an efficient debiasing algorithm, which can be used for any WRS-based methods (weighted random sampling). 
 
+To do an unbiased WRS, we can run the following code (within `./sketch/utils_new.py`), where `p` is the sampling probability vector and `m` is the sample size, a scalar.
+
+```python
+def estWRS_weights(p, m):
+    n = len(p)
+    wrs_index = np.random.choice(n, m, False, p)
+
+    weights = np.zeros(m)
+    p_sum = 0
+    
+    for i in range(m):
+        
+        alpha = n / (i + 1) / (n - i)
+        weights[i] = (1-p_sum) / p[wrs_index[i]] * alpha
+        weights[:i] = weights[:i] * (1 - alpha) + alpha
+        p_sum += p[wrs_index[i]]
+
+    return wrs_index, weights
+```
+
 Concrete details can be found in [our paper](https://openreview.net/forum?id=JyKNuoZGux).
 
 
@@ -33,7 +53,7 @@ The code for gcn tasks is partially adapted from [this repo](https://github.com/
 
 ## Setup Data
 
-- Download `data.zip` from [here](), and unzip it. There will be a `data` folder.
+- Download `data.zip` from [here](https://1drv.ms/u/s!AqsZ7ICy6kBI5Udq6aMEicMQNYrQ?e=zgJzSQ), and unzip it. There will be a `data` folder.
 - Place the `data` folder under the root directory `./`.
 
 ## Run Code
